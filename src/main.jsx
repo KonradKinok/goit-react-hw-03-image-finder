@@ -1,10 +1,10 @@
 import "./globalStyles/index.css"
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./components/App.jsx";
+import { PixabayApi } from "./components/PixabayApi/PixabayApi.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <App />
+    <PixabayApi />
   </React.StrictMode>,
 );
