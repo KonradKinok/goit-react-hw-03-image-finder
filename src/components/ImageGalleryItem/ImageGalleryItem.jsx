@@ -10,7 +10,7 @@ export default class ImageGalleryItem extends Component {
     render() {
         const { id, tags, webformatURL } = this.props;
         return (
-            <li key={id} className="ImageGalleryItem" onClick={this.props.openModal}>
+            <li key={id} data-key={id} className="ImageGalleryItem" onClick={this.props.openModal}>
                 <img className="ImageGalleryItem-image" src={webformatURL} alt={tags} />
             </li>
         )

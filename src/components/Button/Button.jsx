@@ -11,7 +11,6 @@ export default class Button extends Component {
         this.props.handlePagination();
     };
     render() {
-        const { tagModal } = this.props;
         return (
             <>
                 <button type="button" className="button" onClick={this.handlePaginationButton}>Load more </button>
@@ -22,5 +21,4 @@ export default class Button extends Component {
 
 Button.propTypes = {
     handlePagination: PropTypes.func.isRequired,
-    tagModal: PropTypes.string,
 };

@@ -48,14 +48,14 @@ export default class ImageGallery extends Component {
     async fetchPictures(query, currentPage) {
         try {
             const response = await this.fetchPicturesPerPage(query, currentPage);
-            // this.setState({ data: response })
-            this.setState((prevState) => {
-                const uniquePictures = response.filter(
-                    (newPicture) => !prevState.data.some((existingPicture) => existingPicture.id === newPicture.id)
-                );
-                return { data: [...prevState.data, ...uniquePictures] };
-                // return { data: [...uniquePictures] };
-            });
+            if (response) {
+                this.setState((prevState) => {
+                    const uniquePictures = response.filter(
+                        (newPicture) => !prevState.data.some((existingPicture) => existingPicture.id === newPicture.id)
+                    );
+                    return { data: [...prevState.data, ...uniquePictures] };
+                });
+            }
         } catch (error) {
             this.setState({ error })
         } finally {
@@ -87,7 +87,7 @@ export default class ImageGallery extends Component {
             this.props.handleButton(showButton);
             return response.data.hits;
         }
-        return [];
+        return;
     }
 
     render() {
@@ -95,7 +95,6 @@ export default class ImageGallery extends Component {
 
         return (
             <ul className="ImageGallery">
-                <li>{data.length}</li>
                 {data.map((image) => (
                     <ImageGalleryItem
                         id={image.id}

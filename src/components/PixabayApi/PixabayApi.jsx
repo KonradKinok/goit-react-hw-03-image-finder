@@ -60,7 +60,6 @@ export class PixabayApi extends Component {
         return (
             <div className="app">
                 <Searchbar handleSearch={this.handleSearch} />
-                <h2>{currentPage}</h2>
                 {isLoaderVisible ?
                     (<Loader isLoaderVisible={isLoaderVisible} />) :
                     (<ImageGallery handleLoader={this.handleLoader} handleButton={this.handleButton} queryImageGallery={queryPixabayApi} currentPage={currentPage} openModal={this.openModal} />)}
