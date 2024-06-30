@@ -2,10 +2,6 @@ import "./ImageGallery.scss"
 import { Component } from "react";
 import PropTypes from "prop-types";
 import axios from 'axios';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
-const optionsNotify = {
-    timeout: 2000,
-};
 import ImageGalleryItem from "../ImageGalleryItem/ImageGalleryItem";
 const apiKey = '43602379-82b2565bd0b0a0b53c6c265a8';
 
@@ -14,31 +10,58 @@ export default class ImageGallery extends Component {
     constructor() {
         super();
         this.state = {
-            contacts: [],
-            filter: "",
-            random: 0,
-            prevRandom: 0,
-            data: {},
+            data: [],
+            error: null,
         };
     }
 
     async componentDidMount() {
-        // const response = await this.fetchPicturesPerPage(this.props.queryImageGallery)
-        // this.setState({ data: response })
+        await this.fetchPictures(this.props.queryImageGallery, this.props.currentPage);
+        console.log("componentDidMount")
     }
-    async shouldComponentUpdate(nextProps, nextState) {
-        const oldProps = this.props
 
-        if (nextProps.queryImageGallery === oldProps.queryImageGallery) {
+    async componentWillUnmount() {
+        await this.fetchPictures(this.props.queryImageGallery, this.props.currentPage);
+    }
+
+    async shouldComponentUpdate(nextProps, nextState) {
+        const oldProps = this.props;
+        if (nextProps.queryImageGallery === oldProps.queryImageGallery &&
+            nextProps.currentPage === oldProps.currentPage) {
             console.log("shouldComponentUpdate:false")
             return false;
         }
         console.log("shouldComponentUpdate:true")
-        const response = await this.fetchPicturesPerPage(this.props.queryImageGallery)
-        this.setState({ data: response })
         return true;
     }
 
+    async componentDidUpdate(prevProps) {
+        if (prevProps.queryImageGallery !== this.props.queryImageGallery ||
+            prevProps.currentPage !== this.props.currentPage) {
+            this.props.handleLoader(true);
+            await this.fetchPictures(this.props.queryImageGallery, this.props.currentPage);
+            this.props.handleLoader(false);
+            console.log("componentDidUpdate")
+        }
+    }
+
+    async fetchPictures(query, currentPage) {
+        try {
+            const response = await this.fetchPicturesPerPage(query, currentPage);
+            // this.setState({ data: response })
+            this.setState((prevState) => {
+                const uniquePictures = response.filter(
+                    (newPicture) => !prevState.data.some((existingPicture) => existingPicture.id === newPicture.id)
+                );
+                return { data: [...prevState.data, ...uniquePictures] };
+                // return { data: [...uniquePictures] };
+            });
+        } catch (error) {
+            this.setState({ error })
+        } finally {
+            this.props.handleLoader(false);
+        }
+    }
 
     //Functions
     /**
@@ -47,7 +70,7 @@ export default class ImageGallery extends Component {
      * @param {number} currentPage - Numer bieżącej strony
      * @returns {Promise<object>} Obiekt zawierający dane o obrazach
      */
-    async fetchPicturesPerPage(query, currentPage = 1) {
+    async fetchPicturesPerPage(query, currentPage) {
         const searchParams = new URLSearchParams({
             key: apiKey,
             q: query,
@@ -56,67 +79,26 @@ export default class ImageGallery extends Component {
             per_page: 12,
             page: currentPage,
         });
-        const url = `https://pixabay.com/api/?${searchParams}`;
-
-        const response = await axios.get(url);
-        return response.data;
-    }
-
-    //Funkcje
-    /**
-     * loadNextPage
-     * * Pobiera i renderuje kolejną stronę obrazków na podstawie podanego zapytania.
-     * @param {string} query - Zapytanie wyszukiwania obrazków.
-     * @returns {void}
-     */
-    async loadNextPage(query) {
-        let messageNotify = '';
-        this.fetchPicturesPerPage(query, 1)
-            .then(picturesCollection => {
-                if (picturesCollection.hits.length > 0) {
-
-                    if (currentPage === 1) {
-                        Notify.success(
-                            `Hooray! We found ${picturesCollection.totalHits} images.`,
-                            optionsNotify
-                        );
-                    } else {
-
-                    }
-                } else {
-                    if (currentPage === 1) {
-                        messageNotify = `No results found. Try searching using different query data.`;
-                    } else {
-                        messageNotify = `We're sorry, but you've reached the end of search results.`;
-
-                    }
-                    Notify.info(messageNotify, optionsNotify);
-                }
-                // currentPage++;
-            })
-            .catch(error => {
-                if (error.message.includes('400')) {
-                    messageNotify = `We're sorry, but you've reached the end of search results.`;
-                    Notify.info(messageNotify, optionsNotify);
-
-                } else {
-                    messageNotify = error;
-                    Notify.failure(messageNotify, optionsNotify);
-                }
-            });
-    }
-    render() {
-        const { filter, contacts } = this.state;
-        const { total, totalHits, hits } = this.state.data;
-        if (!hits) {
-            return null;
+        if (query) {
+            const url = `https://pixabay.com/api/?${searchParams}`;
+            console.log(url);
+            const response = await axios.get(url);
+            const showButton = response.data.hits.length > 0;
+            this.props.handleButton(showButton);
+            return response.data.hits;
         }
+        return [];
+    }
+
+    render() {
+        const { data } = this.state;
 
         return (
             <ul className="ImageGallery">
-                {hits.map((image) => (
+                <li>{data.length}</li>
+                {data.map((image) => (
                     <ImageGalleryItem
-                        key={image.id}
+                        id={image.id}
                         tags={image.tags}
                         webformatURL={image.webformatURL}
                         largeImageURL={image.largeImageURL}
@@ -128,3 +110,10 @@ export default class ImageGallery extends Component {
     }
 }
 
+ImageGallery.propTypes = {
+    queryImageGallery: PropTypes.string.isRequired,
+    currentPage: PropTypes.number.isRequired,
+    handleLoader: PropTypes.func.isRequired,
+    handleButton: PropTypes.func.isRequired,
+    openModal: PropTypes.func.isRequired,
+};

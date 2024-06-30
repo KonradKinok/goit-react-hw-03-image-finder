@@ -1,14 +1,12 @@
 import "./Modal.scss"
 import { Component } from "react";
 import PropTypes from "prop-types";
-import axios from 'axios';
 
 export default class Modal extends Component {
-
     constructor() {
         super();
-
     }
+
     componentDidMount() {
         window.addEventListener('keydown', this.handleEsc);
     }
@@ -28,6 +26,7 @@ export default class Modal extends Component {
             this.props.closeModal();
         }
     };
+
     render() {
         const { imgUrlModal, tagModal } = this.props;
         return (
@@ -39,3 +38,9 @@ export default class Modal extends Component {
         )
     }
 }
+
+Modal.propTypes = {
+    imgUrlModal: PropTypes.string.isRequired,
+    tagModal: PropTypes.string.isRequired,
+    closeModal: PropTypes.func.isRequired,
+};

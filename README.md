@@ -1,3 +1,11 @@
+# goit-react-hw-03-phonebook
+
+Link do repozytorium:
+https://github.com/KonradKinok/goit-react-hw-03-image-finder
+
+Link do strony:
+https://konradkinok.github.io/goit-react-hw-03-image-finder/
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

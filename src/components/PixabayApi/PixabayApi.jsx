@@ -1,28 +1,46 @@
 import { Component } from "react";
 import PropTypes from "prop-types";
-import scss from "./PixabayApi.module.scss";
-import axios from 'axios';
+import "./PixabayApi.scss";
 import { Searchbar } from "../Searchbar/Searchbar"
 import ImageGallery from "../ImageGallery/ImageGallery";
 import Modal from "../Modal/Modal";
+import Button from "../Button/Button";
+import Loader from "../Loader/Loader"
 
 
 export class PixabayApi extends Component {
-
     constructor() {
         super();
         this.state = {
-
             queryPixabayApi: "",
+            currentPage: 1,
             isModalOpen: false,
-            imgUrlModal: "https://pixabay.com/get/gc3e117989f3cb8c434278740ec1912c48eda6c89aefe3fb6f33eaf41487336392d1ef36ab750470b7ecb927259996a869db5e43b7c22e83521c84f62cc0f7de1_1280.jpg",
+            isLoaderVisible: false,
+            isButtonVisible: false,
+            imgUrlModal: "",
             tagModal: "",
         };
     }
 
-
     handleSearch = (query) => {
-        this.setState({ queryPixabayApi: query })
+        this.setState({
+            queryPixabayApi: query,
+            currentPage: 1,
+        })
+    }
+
+    handlePagination = () => {
+        this.setState((prevState) => ({
+            currentPage: prevState.currentPage + 1
+        }));
+    }
+
+    handleLoader = (isLoaderVisible) => {
+        this.setState({ isLoaderVisible })
+    }
+
+    handleButton = (isButtonVisible) => {
+        this.setState({ isButtonVisible })
     }
 
     openModal = (imgUrlModal, tagModal) => {
@@ -38,14 +56,15 @@ export class PixabayApi extends Component {
     }
 
     render() {
-        const { queryPixabayApi, isModalOpen, imgUrlModal, tagModal } = this.state;
+        const { queryPixabayApi, currentPage, isModalOpen, isLoaderVisible, isButtonVisible, imgUrlModal, tagModal } = this.state;
         return (
-            <div >
+            <div className="app">
                 <Searchbar handleSearch={this.handleSearch} />
-                {/* <ContactForm addContact={this.addContact} contacts={contacts} /> */}
-
-                <h2>{queryPixabayApi}</h2>
-                <ImageGallery queryImageGallery={this.state.queryPixabayApi} openModal={this.openModal} />
+                <h2>{currentPage}</h2>
+                {isLoaderVisible ?
+                    (<Loader isLoaderVisible={isLoaderVisible} />) :
+                    (<ImageGallery handleLoader={this.handleLoader} handleButton={this.handleButton} queryImageGallery={queryPixabayApi} currentPage={currentPage} openModal={this.openModal} />)}
+                {isButtonVisible && <Button handlePagination={this.handlePagination} />}
                 {isModalOpen && <Modal closeModal={this.closeModal} imgUrlModal={imgUrlModal} tagModal={tagModal} />}
             </div>
         )
