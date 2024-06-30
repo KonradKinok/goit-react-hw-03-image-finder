@@ -20,10 +20,6 @@ export default class ImageGallery extends Component {
         console.log("componentDidMount")
     }
 
-    async componentWillUnmount() {
-        await this.fetchPictures(this.props.queryImageGallery, this.props.currentPage);
-    }
-
     async shouldComponentUpdate(nextProps, nextState) {
         const oldProps = this.props;
         if (nextProps.queryImageGallery === oldProps.queryImageGallery &&
